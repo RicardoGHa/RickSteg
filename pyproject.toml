@@ -7,7 +7,7 @@ name = "stegosaurus-wrecks"
 version = "3.0.0"
 description = "🦕 Ultimate Steganography Suite - Encode, Decode, Inject"
 readme = "README.md"
-license = {text = "Apache-2.0"}
+license = {text = "AGPL 3.0"}
 requires-python = ">=3.9"
 authors = [
     {name = "STEGOSAURUS WRECKS"}
@@ -18,7 +18,6 @@ classifiers = [
     "Environment :: Console",
     "Intended Audience :: Developers",
     "Intended Audience :: Information Technology",
-    "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
@@ -54,8 +53,8 @@ steg-web = "webui:main"
 # steg-web-legacy requires: streamlit run app.py (no main() entry point)
 
 [project.urls]
-Homepage = "https://github.com/LYS10S/ST3GG"
-Repository = "https://github.com/LYS10S/ST3GG"
+Homepage = "https://github.com/elder-plinius/ST3GG"
+Repository = "https://github.com/elder-plinius/ST3GG"
 
 [tool.setuptools.packages.find]
 where = ["."]
