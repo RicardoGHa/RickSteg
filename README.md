@@ -266,17 +266,46 @@ pip install stegg
 That's it. Now you have `stegg` in your terminal:
 
 ```bash
-# Encode a secret message
-stegg encode image.png "your secret message" -o stego.png
+# Encode a secret message into an image
+stegg encode -i photo.png -t "secret message" -o hidden.png
 
-# Decode hidden data
-stegg decode stego.png
+# Encode with file payload and encryption
+stegg encode -i photo.png -f secret.txt -p mypassword -o hidden.png
 
-# Analyze a suspicious file
-stegg analyze suspicious.png --full
+# Encode with custom channels and bit depth (4MB+ capacity)
+stegg encode -i photo.png -t "data" -c RGBA -b 2 -o hidden.png
 
-# SPECTER mode with password
-stegg encode image.png "{SPECTER:ENABLED}" -o stego.png
+# Use different encoding strategies
+stegg encode -i photo.png -t "spread" -s spread -o hidden.png
+stegg encode -i photo.png -t "random" -s randomized --seed 12345 -o hidden.png
+
+# Use a jailbreak template
+stegg encode -i photo.png --template pliny_classic -j -o hidden.png
+
+# Decode hidden data (auto-detect configuration)
+stegg decode -i hidden.png
+
+# Decode with password
+stegg decode -i hidden.png -p mypassword
+
+# Decode and save to file
+stegg decode -i hidden.png -o extracted.bin
+
+# Analyze an image for steganographic content
+stegg analyze photo.png
+
+# Full analysis with all channels
+stegg analyze photo.png --full
+
+# Show system info and capabilities
+stegg info
+
+# Injection utilities
+stegg inject filename -t chatgpt_decoder -c RGB          # Generate injection filename
+stegg inject templates                                   # List available jailbreak templates
+stegg inject show pliny_classic                         # Show template content
+stegg inject zalgo "Hello World" --intensity 3          # Convert to Zalgo text
+stegg inject leet "Hello World" --intensity 2           # Convert to leetspeak
 ```
 
 ### Install with extras
@@ -308,49 +337,93 @@ pip install -e ".[all]"
 ### Interfaces
 
 ```bash
-stegg --help          # CLI
-stegg-tui             # Terminal UI (requires: pip install stegg[tui])
-stegg-web             # Browser UI (requires: pip install stegg[web])
+stegg --help              # Show main help
+stegg encode --help       # Show encode options
+stegg decode --help       # Show decode options
+stegg analyze --help      # Show analyze options
+stegg inject --help       # Show injection tools
+stegg info                # System info & capabilities
+
+# Terminal UI (requires: pip install stegg[tui])
+stegg-tui
+
+# Web UI (requires: pip install stegg[web])
+stegg-web
 ```
 
 ---
 
 ## ⊰ Channel & Bit Depth ⊱
 
-### 15 Channel Presets x 8 Bit Depths = 120 Combinations
+### 15 Channel Presets × 8 Bit Depths = 120 Combinations
 
-| Preset | Stealth | Capacity | Best For |
-|--------|---------|----------|----------|
-| B (Blue, 1-bit) | Excellent | Low | Maximum invisibility |
-| RGB (3-channel, 1-bit) | Very Good | Medium | Balanced |
-| RGBA (4-channel, 4-bit) | Moderate | **4MB+** | Large file hiding |
+| Preset | Channels | Stealth | Capacity | Use Case |
+|--------|----------|---------|----------|----------|
+| R | Red only | Excellent | Very Low | Maximum invisibility |
+| G | Green only | ★★★★★ | Very Low | Optimal for human eye |
+| B | Blue only | ★★★★ | Very Low | Max invisibility |
+| RG | Red + Green | ★★★★ | Low | Balanced |
+| RB | Red + Blue | ★★★ | Low | Alternate approach |
+| RGB | Red + Green + Blue | ★★★ | **Medium** | Default, balanced |
+| RGBA | Red + Green + Blue + Alpha | ★★ | **High (4MB+)** | Large payloads |
+| GBA, RGA, RBA | Various 3-channel | ★★★ | Medium | Custom combinations |
+
+Use with bits per channel (1-8) to fine-tune capacity vs. stealth:
+- **1-bit**: Minimal change, maximum stealth
+- **2-4 bits**: Balanced
+- **8 bits**: Maximum capacity (but visible to detection)
 
 ### 4 Encoding Strategies
 
-| Strategy | Description |
-|----------|-------------|
-| **Sequential** | Bits placed in pixel order (fastest) |
-| **Interleaved** | Alternating pixels across image |
-| **Spread** | Distributed evenly across entire image |
-| **Randomized** | Pseudo-random placement (seeded PRNG) |
+| Strategy | Placement | Speed | Detection Resistance | Use Case |
+|----------|-----------|-------|---------------------|----------|
+| **sequential** | Sequential pixel order | Fastest | Low | Simple encoding |
+| **interleaved** | Alternating pixels | Fast | Medium | Default, balanced |
+| **spread** | Distributed across entire image | Medium | High | Better stealth |
+| **randomized** | Pseudo-random (seeded PRNG) | Medium | Very High | Strongest evasion |
 
-### Capacity Formula
+Use `--seed` with randomized strategy for reproducible decoding.
+
+### Capacity Calculator
 
 ```
-Capacity = (Width x Height x Channels x BitsPerChannel) / 8 bytes
+Capacity = (Width × Height × NumChannels × BitsPerChannel) / 8 bytes
 ```
 
-A 1920x1080 image with RGB 1-bit holds ~760KB. With RGBA 4-bit: **~4MB**.
+**Examples:**
+- 1920×1080 image, RGB 1-bit: ~760 KB
+- 1920×1080 image, RGB 8-bit: ~6 MB
+- 1920×1080 image, RGBA 4-bit: **~4 MB** (recommended)
 
 ---
 
-## ⊰ Encryption ⊱
+## ⊰ Encryption & Security ⊱
 
-| Method | Strength | Speed | Use Case |
-|--------|----------|-------|----------|
-| **AES-256-GCM** | Maximum | Medium | Ghost Mode |
-| **XOR Obfuscation** | Minimal | Fast | Basic scrambling only (not encryption) |
-| **None** | - | Fastest | When secrecy isn't needed |
+### Encryption Methods
+
+| Method | Strength | Key Size | Speed | Configuration |
+|--------|----------|----------|-------|---------------|
+| **AES-256-GCM** | Maximum | 256-bit | Medium | `pip install stegg[crypto]` + `-p PASSWORD` |
+| **XOR** | Minimal | Variable | Very Fast | `-p PASSWORD` (fallback) |
+| **None** | - | - | Fastest | (default, unencrypted) |
+
+### Usage
+
+```bash
+# Encode with AES-256-GCM encryption
+stegg encode -i photo.png -t "secret" -p "strong_password" -o hidden.png
+
+# Decode with decryption
+stegg decode -i hidden.png -p "strong_password"
+```
+
+### Best Practices
+
+1. **Always encrypt sensitive data** before embedding
+2. **Use strong passwords** (16+ characters, mixed case, numbers, symbols)
+3. **For maximum stealth**: Combine encryption + Ghost Mode + randomized strategy + higher bit depth
+4. **Compression**: Enabled by default (use `--no-compress` to disable)
+5. **Checksum verification**: Enabled by default (use `--no-verify` to skip)
 
 ---
 
