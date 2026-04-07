@@ -267,29 +267,33 @@ That's it. Now you have `stegg` in your terminal:
 
 ```bash
 # Encode a secret message into an image
-stegg encode -i photo.png -t "secret message" -o hidden.png
+stegg encode-cmd -i photo.png -t "secret message" -o hidden.png
 
 # Encode with file payload and encryption
-stegg encode -i photo.png -f secret.txt -p mypassword -o hidden.png
+stegg encode-cmd -i -i photo.png -f secret.txt -p mypassword -o hidden.png
 
 # Encode with custom channels and bit depth (4MB+ capacity)
-stegg encode -i photo.png -t "data" -c RGBA -b 2 -o hidden.png
+stegg encode-cmd -i photo.png -t "data" -c RGBA -b 2 -o hidden.png
+        
+        stegg encode-cmd -i photo.png --template pliny_classic -j
+        stegg encode-cmd -i photo.png -t "spread out" -s spread
+        stegg encode-cmd -i photo.png -t "random order" -s randomized --seed 12345
 
 # Use different encoding strategies
-stegg encode -i photo.png -t "spread" -s spread -o hidden.png
-stegg encode -i photo.png -t "random" -s randomized --seed 12345 -o hidden.png
+stegg encode-cmd -i photo.png -t "spread" -s spread -o hidden.png
+stegg encode-cmd -i photo.png -t "random" -s randomized --seed 12345 -o hidden.png
 
 # Use a jailbreak template
-stegg encode -i photo.png --template pliny_classic -j -o hidden.png
+stegg encode-cmd -i photo.png --template pliny_classic -j -o hidden.png
 
 # Decode hidden data (auto-detect configuration)
-stegg decode -i hidden.png
+stegg decode-cmd -i hidden.png
 
 # Decode with password
-stegg decode -i hidden.png -p mypassword
+stegg decode-cmd -i hidden.png -p mypassword
 
 # Decode and save to file
-stegg decode -i hidden.png -o extracted.bin
+stegg decode-cmd -i hidden.png -o extracted.bin
 
 # Analyze an image for steganographic content
 stegg analyze photo.png
